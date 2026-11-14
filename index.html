@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Bloques 15m · Ocio y Calma</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect width='128' height='128' rx='28' fill='%230f172a'/%3E%3Ccircle cx='64' cy='64' r='42' fill='none' stroke='%2338bdf8' stroke-width='10'/%3E%3Cpath d='M64 36v28l18 12' fill='none' stroke='%23f8fafc' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0;
+      --fg: #0f172a; --muted: #64748b; --primary: #0284c7; --primary-fg: #ffffff;
+      --c1: #0284c7; --c2: #10b981; --c3: #f59e0b; --c4: #ec4899;
+    }
+    html.dark {
+      --bg: #0f172a; --card: #1e293b; --border: #334155;
+      --fg: #f8fafc; --muted: #94a3b8; --primary: #38bdf8; --primary-fg: #0f172a;
+      --c1: #38bdf8; --c2: #34d399; --c3: #fbbf24; --c4: #f472b6;
+    }
+    * { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    body { background-color: var(--bg); color: var(--fg); font-family: system-ui, -apple-system, sans-serif; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+  </style>
+</head>
+<body class="min-h-screen antialiased">
+  <main class="max-w-md mx-auto px-4 py-5 space-y-4">
+    <header class="flex items-center justify-between gap-2">
+      <div>
+        <h1 class="text-base font-bold tracking-tight">Bloques 15m</h1>
+        <p class="text-xs" style="color: var(--muted)">Ocio, calma y construcción personal</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="minutesBadge" class="text-xs font-mono px-2.5 py-1 rounded-full border"
+          style="background: var(--card); border-color: var(--border); color: var(--muted)">0 min hoy</span>
+        <button id="themeBtn" type="button" aria-label="Cambiar tema"
+          class="w-8 h-8 rounded-full border flex items-center justify-center text-sm"
+          style="background: var(--card); border-color: var(--border)">☀️</button>
+      </div>
+    </header>
+
+    <nav class="grid grid-cols-3 gap-1 p-1 rounded-xl border text-xs"
+      style="background: var(--card); border-color: var(--border)">
+      <button data-tab="timer" type="button" class="tab-btn py-2 rounded-lg font-semibold transition-colors">Bloque 15m</button>
+      <button data-tab="sack" type="button" class="tab-btn py-2 rounded-lg font-semibold transition-colors">Saco (<span id="sackCount">0</span>)</button>
+      <button data-tab="done" type="button" class="tab-btn py-2 rounded-lg font-semibold transition-colors">Hoy (<span id="doneCount">0</span>)</button>
+    </nav>
+
+    <section id="tab-timer" class="tab-panel active space-y-3">
+      <div class="rounded-2xl border p-4 space-y-3" style="background: var(--card); border-color: var(--border)">
+        <div class="flex items-center justify-between gap-2">
+          <span id="activeCatBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full border"
+            style="background: var(--bg); border-color: var(--border)">Ocio</span>
+          <button id="randomPickBtn" type="button" class="text-xs font-semibold active:scale-95 transition-transform"
+            style="color: var(--primary)">🎲 Sacar otra del saco</button>
+        </div>
+        <div id="activeTitle" class="text-lg font-bold leading-snug">Elige una tarea del saco o saca una al azar</div>
+        <div class="space-y-1.5">
+          <label for="smartInput" class="block text-xs font-medium" style="color: var(--muted)">Hito SMART en estos 15 min (concreto y alcanzable):</label>
+          <input id="smartInput" type="text" placeholder="Ej: Leer 10 páginas sin mirar el móvil..."
+            class="w-full px-3 py-2.5 rounded-xl text-sm border focus:outline-none"
+            style="background: var(--bg); color: var(--fg); border-color: var(--border)" />
+        </div>
+      </div>
+
+      <div class="rounded-2xl border p-4 space-y-4" style="background: var(--card); border-color: var(--border)">
+        <div class="flex items-end justify-between">
+          <div>
+            <div id="timerDisplay" class="text-5xl font-mono font-bold tabular-nums tracking-tight">15:00</div>
+            <div id="timerStatus" class="text-xs mt-1" style="color: var(--muted)">Listo para empezar</div>
+          </div>
+          <button id="resetTimerBtn" type="button"
+            class="px-3 py-2 rounded-xl text-xs font-medium border active:scale-95 transition-transform"
+            style="background: var(--bg); border-color: var(--border); color: var(--muted)">↺ 15:00</button>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <button id="startPauseBtn" type="button" class="py-3 rounded-xl text-sm font-bold active:scale-95 transition-transform"
+            style="background: var(--primary); color: var(--primary-fg)">▶ Empezar</button>
+          <button id="completeBtn" type="button" class="py-3 rounded-xl text-sm font-bold border active:scale-95 transition-transform"
+            style="background: var(--bg); border-color: var(--border)">✓ Hecho</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-sack" class="tab-panel space-y-3">
+      <form id="addTaskForm" class="flex flex-wrap gap-2">
+        <input id="newTaskTitle" type="text" required placeholder="Nueva idea de ocio o cuidado..."
+          class="flex-1 min-w-[170px] px-3 py-2.5 rounded-xl text-sm border focus:outline-none"
+          style="background: var(--card); color: var(--fg); border-color: var(--border)" />
+        <select id="newTaskCat" aria-label="Categoría" class="px-2.5 py-2.5 rounded-xl text-xs font-medium border"
+          style="background: var(--card); color: var(--fg); border-color: var(--border)">
+          <option value="Ocio">Ocio</option>
+          <option value="Calma">Calma</option>
+          <option value="Creación">Creación</option>
+          <option value="Cuerpo">Cuerpo</option>
+        </select>
+        <button type="submit" class="px-4 py-2.5 rounded-xl text-xs font-bold active:scale-95 transition-transform"
+          style="background: var(--primary); color: var(--primary-fg)">+ Meter</button>
+      </form>
+      <div id="sackList" class="space-y-2"></div>
+    </section>
+
+    <section id="tab-done" class="tab-panel space-y-3">
+      <div id="doneList" class="space-y-2"></div>
+      <div class="flex justify-end">
+        <button id="clearDoneBtn" type="button" class="text-xs underline underline-offset-2" style="color: var(--muted)">Limpiar historial de hoy</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const STORAGE_KEY = 'tb15_vacation_pwa_v1';
+      const THEME_KEY = 'tb15_theme_v1';
+      const CAT_COLORS = { 'Ocio': 'var(--c1)', 'Calma': 'var(--c2)', 'Creación': 'var(--c3)', 'Cuerpo': 'var(--c4)' };
+      const DEFAULT_SACK = [
+        { id: '1', title: 'Leer por puro placer', cat: 'Ocio', smart: 'Leer 12 páginas seguidas en un rincón cómodo' },
+        { id: '2', title: 'Paseo sin auriculares ni móvil', cat: 'Calma', smart: 'Caminar 15 min fijándome en 5 detalles del entorno' },
+        { id: '3', title: 'Garabatear o bocetar sin juzgar', cat: 'Creación', smart: 'Llenar media página con trazos o ideas sueltas' },
+        { id: '4', title: 'Estirar espalda, cuello y cadera', cat: 'Cuerpo', smart: 'Hacer 5 estiramientos suaves respirando lento' },
+        { id: '5', title: 'Escuchar un álbum o tema con atención plena', cat: 'Ocio', smart: 'Cerrar los ojos y escuchar 3 canciones sin hacer nada más' },
+        { id: '6', title: 'Escribir 3 cosas curiosas que me rondan la cabeza', cat: 'Creación', smart: 'Anotar 3 preguntas o temas que quiera explorar algún día' },
+        { id: '7', title: 'Tomar un té o café al sol en silencio', cat: 'Calma', smart: 'Disfrutar la bebida entera sin pantallas delante' }
+      ];
+
+      let state = loadState(), secondsLeft = 15 * 60, timerInterval = null, isRunning = false;
+
+      function applyTheme(dark) {
+        document.documentElement.classList.toggle('dark', dark);
+        document.getElementById('themeBtn').textContent = dark ? '☀️' : '🌙';
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', dark ? '#0f172a' : '#f8fafc');
+        localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
+      }
+      const savedTheme = localStorage.getItem(THEME_KEY);
+      applyTheme(savedTheme ? savedTheme === 'dark' : true);
+      document.getElementById('themeBtn').addEventListener('click', () => applyTheme(!document.documentElement.classList.contains('dark')));
+
+      function loadState() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (parsed && Array.isArray(parsed.sack) && Array.isArray(parsed.done)) return parsed;
+        } catch (_) {}
+        return { sack: [...DEFAULT_SACK], done: [], activeTask: DEFAULT_SACK[0] };
+      }
+      function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {} }
+
+      function playGentleChime() {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          [523.25, 659.25, 783.99].forEach((freq, i) => {
+            const osc = ctx.createOscillator(), gain = ctx.createGain(), t = ctx.currentTime + i * 0.14;
+            osc.type = 'sine'; osc.frequency.setValueAtTime(freq, t);
+            gain.gain.setValueAtTime(0.001, t);
+            gain.gain.exponentialRampToValueAtTime(0.2, t + 0.04);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.7);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(t); osc.stop(t + 0.75);
+          });
+        } catch (_) {}
+      }
+
+      function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          const active = btn.dataset.tab === tab;
+          btn.style.background = active ? 'var(--primary)' : 'transparent';
+          btn.style.color = active ? 'var(--primary-fg)' : 'var(--muted)';
+        });
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === `tab-${tab}`));
+      }
+
+      function formatTime(sec) {
+        return `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+      }
+
+      function updateTimerUI() {
+        document.getElementById('timerDisplay').textContent = formatTime(secondsLeft);
+        const btn = document.getElementById('startPauseBtn'), status = document.getElementById('timerStatus');
+        if (isRunning) { btn.textContent = '⏸ Pausar'; status.textContent = 'En marcha · sin prisas'; }
+        else if (secondsLeft === 0) { btn.textContent = '▶ Empezar'; status.textContent = '¡Bloque de 15 min completado!'; }
+        else if (secondsLeft < 15 * 60) { btn.textContent = '▶ Seguir'; status.textContent = 'En pausa'; }
+        else { btn.textContent = '▶ Empezar'; status.textContent = 'Listo para empezar'; }
+      }
+
+      function toggleTimer() {
+        if (isRunning) { clearInterval(timerInterval); isRunning = false; }
+        else {
+          if (secondsLeft <= 0) secondsLeft = 15 * 60;
+          isRunning = true;
+          const endAt = Date.now() + secondsLeft * 1000;
+          timerInterval = setInterval(() => {
+            secondsLeft = Math.max(0, Math.round((endAt - Date.now()) / 1000));
+            if (secondsLeft <= 0) { secondsLeft = 0; clearInterval(timerInterval); isRunning = false; playGentleChime(); }
+            updateTimerUI();
+          }, 500);
+        }
+        updateTimerUI();
+      }
+
+      function resetTimer() { clearInterval(timerInterval); isRunning = false; secondsLeft = 15 * 60; updateTimerUI(); }
+      function selectTask(task) { state.activeTask = { ...task }; saveState(); renderActiveTask(); switchTab('timer'); }
+      function pickRandomTask() {
+        if (!state.sack.length) return;
+        let pool = (state.sack.length > 1 && state.activeTask) ? state.sack.filter(t => t.id !== state.activeTask.id) : state.sack;
+        selectTask(pool[Math.floor(Math.random() * pool.length)]);
+      }
+
+      function completeCurrentBlock() {
+        const title = state.activeTask ? state.activeTask.title : 'Bloque libre';
+        const cat = state.activeTask ? state.activeTask.cat : 'Ocio';
+        const smart = document.getElementById('smartInput').value.trim();
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        state.done.unshift({ id: String(Date.now()), title, cat, smart: smart || (state.activeTask && state.activeTask.smart) || '', time });
+        saveState(); resetTimer(); renderCounts(); renderDone(); switchTab('done');
+      }
+
+      function renderActiveTask() {
+        const t = state.activeTask, badge = document.getElementById('activeCatBadge'), titleEl = document.getElementById('activeTitle'), smartEl = document.getElementById('smartInput');
+        if (!t) { badge.textContent = 'Ocio'; titleEl.textContent = 'Mete una idea en el saco para empezar'; smartEl.value = ''; return; }
+        badge.textContent = t.cat; badge.style.borderColor = CAT_COLORS[t.cat] || 'var(--border)';
+        titleEl.textContent = t.title; smartEl.value = t.smart || '';
+      }
+
+      function renderCounts() {
+        document.getElementById('sackCount').textContent = state.sack.length;
+        document.getElementById('doneCount').textContent = state.done.length;
+        document.getElementById('minutesBadge').textContent = `${state.done.length * 15} min hoy`;
+      }
+
+      function escapeHtml(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      function renderSack() {
+        const list = document.getElementById('sackList'); list.innerHTML = '';
+        if (!state.sack.length) { list.innerHTML = `<div class="text-xs py-6 text-center" style="color: var(--muted)">El saco está vacío.</div>`; return; }
+        state.sack.forEach(item => {
+          const row = document.createElement('div');
+          row.className = 'flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5';
+          row.style.background = 'var(--card)'; row.style.borderColor = 'var(--border)';
+          const left = document.createElement('button'); left.type = 'button'; left.className = 'flex items-center gap-2 text-left flex-1 min-w-0';
+          left.innerHTML = `<span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${CAT_COLORS[item.cat] || 'var(--primary)'}"></span><span class="text-sm font-medium truncate">${escapeHtml(item.title)}</span>`;
+          left.addEventListener('click', () => selectTask(item));
+          const right = document.createElement('div'); right.className = 'flex items-center gap-2 shrink-0';
+          right.innerHTML = `<span class="text-xs" style="color: var(--muted)">${escapeHtml(item.cat)}</span>`;
+          const delBtn = document.createElement('button'); delBtn.type = 'button'; delBtn.className = 'text-xs px-1.5 py-0.5 rounded'; delBtn.style.color = 'var(--muted)'; delBtn.textContent = '✕';
+          delBtn.addEventListener('click', () => { state.sack = state.sack.filter(x => x.id !== item.id); saveState(); renderSack(); renderCounts(); });
+          right.appendChild(delBtn); row.appendChild(left); row.appendChild(right); list.appendChild(row);
+        });
+      }
+
+      function renderDone() {
+        const list = document.getElementById('doneList'); list.innerHTML = '';
+        if (!state.done.length) { list.innerHTML = `<div class="text-xs py-6 text-center" style="color: var(--muted)">Aún no has cerrado ningún bloque hoy. ¡Empieza con 15 minutos suaves!</div>`; return; }
+        state.done.forEach(item => {
+          const row = document.createElement('div'); row.className = 'rounded-xl border px-3 py-2.5 space-y-1';
+          row.style.background = 'var(--card)'; row.style.borderColor = 'var(--border)';
+          row.innerHTML = `<div class="flex items-center justify-between gap-2"><div class="flex items-center gap-2 min-w-0"><span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${CAT_COLORS[item.cat] || 'var(--primary)'}"></span><span class="text-sm font-semibold truncate">${escapeHtml(item.title)}</span></div><span class="text-xs font-mono shrink-0" style="color: var(--muted)">${escapeHtml(item.time)}</span></div>${item.smart ? `<div class="text-xs pl-4 truncate" style="color: var(--muted)">${escapeHtml(item.smart)}</div>` : ''}`;
+          list.appendChild(row);
+        });
+      }
+
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+      document.getElementById('startPauseBtn').addEventListener('click', toggleTimer);
+      document.getElementById('resetTimerBtn').addEventListener('click', resetTimer);
+      document.getElementById('completeBtn').addEventListener('click', completeCurrentBlock);
+      document.getElementById('randomPickBtn').addEventListener('click', pickRandomTask);
+      document.getElementById('smartInput').addEventListener('input', e => { if (state.activeTask) { state.activeTask.smart = e.target.value; saveState(); } });
+      document.getElementById('addTaskForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const titleInput = document.getElementById('newTaskTitle'), catInput = document.getElementById('newTaskCat'), title = titleInput.value.trim();
+        if (!title) return;
+        state.sack.unshift({ id: String(Date.now()), title, cat: catInput.value, smart: '' });
+        saveState(); titleInput.value = ''; renderSack(); renderCounts();
+      });
+      document.getElementById('clearDoneBtn').addEventListener('click', () => { state.done = []; saveState(); renderDone(); renderCounts(); });
+
+      switchTab('timer'); renderActiveTask(); renderSack(); renderDone(); renderCounts(); updateTimerUI();
+    })();
+  </script>
+</body>
+</html>
